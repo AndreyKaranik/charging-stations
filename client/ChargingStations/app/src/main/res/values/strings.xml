@@ -1,0 +1,55 @@
+<resources>
+    <string name="app_name" translatable="false">ChargingStations</string>
+    <string name="title_activity_qrscanner" translatable="false">QRScannerActivity</string>
+    <string name="enable">Enable</string>
+    <string name="cancel">Cancel</string>
+    <string name="continue_">Continue</string>
+    <string name="try_it_again">Try it again</string>
+    <string name="incorrect_qrcode_dialog_title">The QR code is incorrect</string>
+    <string name="charging_station_not_found_dialog_title">Charging station not found</string>
+    <string name="gps_dialog_title">GPS must be turned on</string>
+    <string name="no_internet_connection_dialog_title">No internet connection</string>
+    <string name="connection_problem_dialog_title">Connection problem</string>
+    <string name="charging_stations">Charging stations:</string>
+    <string name="charging_station_search_bar_placeholder">Enter the name or address of the charging station</string>
+    <string name="charging_station_search_bar_label">Search</string>
+    <string name="charging_station_search_problem_message">Problems with connection</string>
+    <string name="charging_station_search_problem_button_label">Try it again</string>
+    <string name="charging_station_details_fetch_problem_message">Failed to fetch charging station information</string>
+    <string name="charging_station_details_fetch_problem_button_label">Try it again</string>
+    <string name="charging_station_details_opening_hours">Opening hours:</string>
+    <string name="charging_station_details_connectors_title">Connectors at the station</string>
+    <string name="charging_station_details_no_connectors">No connectors</string>
+    <string name="charging_station_details_description_title">Description of the charging station</string>
+    <string name="charging_station_details_no_description">No description</string>
+    <string name="charging_station_details_marks_title">Marks</string>
+    <string name="charging_station_details_no_marks">No marks</string>
+    <string name="charging_station_details_connector_active">Active</string>
+    <string name="charging_station_details_connector_inactive">Not working</string>
+    <string name="charging_station_details_connector_occupied">Occupied</string>
+    <string name="charging_station_details_mark_success">Charging was successful</string>
+    <string name="charging_station_details_mark_failed">Charging failed</string>
+    <string name="charging_station_details_anonymous">Unauthorized user</string>
+    <string name="charging_station_details_connector_button_label">Select</string>
+    <string name="title_activity_authentication" translatable="false">AuthenticationActivity</string>
+    <string name="registration_title">Sign up</string>
+    <string name="authorization_title">Sign in</string>
+    <string name="user_name_text_field_placeholder">Enter the username</string>
+    <string name="user_email_text_field_placeholder" translatable="false">example@email.com</string>
+    <string name="user_password_text_field_placeholder">Enter the user password</string>
+    <string name="user_name_text_field_label">Username</string>
+    <string name="user_email_text_field_label">Email</string>
+    <string name="user_password_text_field_label">Password</string>
+    <string name="user_name_must_contain_at_least_n_characters_valid_message">The username must contain at least 5 characters</string>
+    <string name="password_must_contain_at_least_n_characters_valid_message">The password must contain at least 5 characters</string>
+    <string name="incorrect_email_valid_message">Incorrect email</string>
+    <string name="only_latin_characters_and_numbers_are_allowed_valid_message">Only Latin characters and numbers are allowed</string>
+    <string name="sign_in_button_label">Sign in</string>
+    <string name="sign_up_button_label">Sign up</string>
+    <string name="skip_button_label">Skip</string>
+    <string name="create_a_new_account_button_label">Create a new account</string>
+    <string name="already_have_an_account_button_label">Already have an account</string>
+    <string name="privacy_policy_button_label">Privacy policy</string>
+    <string name="privacy_policy_text">By signing up, you agree to our</string>
+    <string name="title_activity_order">OrderActivity</string>
+</resources>

@@ -1,0 +1,96 @@
+1. curl -X GET 127.0.0.1:8000/users
+2. curl -X POST 127.0.0.1:8000/users
+
+3. curl -X GET 127.0.0.1:8000/charging-stations
+Response-Code: 200
+Response-Body:
+[
+    {
+        "id": 0,
+        "name": "blue",
+        "address": "Moscow"
+        ...
+    }
+    ...
+]
+
+4. curl -X GET 127.0.0.1:8000/charging-stations/{id}
+
+//curl -X POST -H "Authorization: Basic {token}" 127.0.0.1:8080/charge
+
+5. curl -X POST 127.0.0.1:8000/charge
+6. curl -X GET "127.0.0.1:8000/orders/{id}/charging-information"
+
+
+curl -X GET "89.111.172.144:8000/charging-stations" -v
+
+java -jar ChargingStationsServer-1.0.jar
+
+curl -X POST 127.0.0.1:8000/register -H "Content-Type: application/json" -d @body.json
+
+
+
+SELECT COUNT(1) FROM users WHERE name = "john";
+
+/charging-stations?level=min                // id, latitude, longitude
+/charging-stations?level=medium             // id, latitude, longitude, name, address, charging_types
+
+(query = ул. Брусилова)
+/charging-stations?level=medium&query=%D1%83%D0%BB.%20%D0%91%D1%80%D1%83%D1%81%D0%B8%D0%BB%D0%BE%D0%B2%D0%B0
+
+/charging-stations/{id}
+/charging-station-images/{id}
+
+// /charging-stations/{id}                     // id, ..., connectorIds, markIds
+// /charging-stations/{id}?details=true        // id, ..., connectors, marks
+
+
+windows:
+psql -U postgres
+\i 'C:/Users/Golum/Desktop/iu9-education/course-work-2024/server/init.sql'
+
+linux:
+sudo -i -u postgres
+psql
+\i '/var/lib/postgresql/init.sql'
+
+
+OLD IP: 89.111.172.144
+NEW IP: 194.67.88.154
+
+
+pscp "C:\Users\Golum\Desktop\1_1.jpg" "C:\Users\Golum\Desktop\1_2.jpg" "C:\Users\Golum\Desktop\2_1.jpg" root@194.67.88.154:/root/chargingstations/images
+pscp "C:\Users\Golum\Desktop\iu9-education\course-work-2024\server\privacy-policy.html" root@194.67.88.154:/root/chargingstations
+pscp "C:\Users\Golum\Desktop\email.txt" root@194.67.88.154:/root/chargingstations
+
+pscp "C:\Users\Golum\Desktop\iu9-education\course-work-2024\server\init.sql" root@194.67.88.154:/root/chargingstations
+pscp "C:\Users\Golum\Desktop\iu9-education\course-work-2024\server\ChargingStationsServer\target\ChargingStationsServer-1.0.jar" root@194.67.88.154:/root/chargingstations
+
+
+pscp "C:\Users\Golum\Desktop\iu9-education\course-work-2024\server\init.sql" "C:\Users\Golum\Desktop\iu9-education\course-work-2024\server\ChargingStationsServer\target\ChargingStationsServer-1.0.jar" root@194.67.88.154:/root/chargingstations
+ssh root@194.67.88.154
+sudo mv /root/chargingstations/init.sql /var/lib/postgresql/
+sudo chmod 644 /var/lib/postgresql/init.sql
+sudo -i -u postgres
+psql
+\i '/var/lib/postgresql/init.sql'
+sudo systemctl restart csserver.service
+
+
+
+
+
+
+SELECT DISTINCT ct.id, ct.name, ct.current_type
+        FROM charging_stations cs
+        JOIN connectors c ON cs.id = c.charging_station_id
+        JOIN charging_types ct ON c.charging_type_id = ct.id
+        WHERE cs.id = 3;
+
+
+
+nohup java -jar -cp /root/chargingstations ChargingStationsServer-1.0.jar > server.log 2>&1 &
+kill -9 $(lsof -t -i:8000)
+
+
+

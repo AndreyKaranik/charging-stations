@@ -1,0 +1,18 @@
+
+Запрос:
+
+GET http://194.67.88.154:8000/confirm?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... HTTP/1.1
+
+Ответ:
+
+HTTP/1.1 200 OK
+Content-Type: text/html
+Content-Length: 45
+
+<html>
+  <body>
+    Success
+  </body>
+</html>
+
+

@@ -1,0 +1,55 @@
+
+Запрос:
+
+GET http://194.67.88.154:8000/charging-stations/1 HTTP/1.1
+
+Ответ:
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 3570
+
+{
+    "id": 1,
+    "latitude": 55.756,
+    "longitude": 37.618,
+    "name": "Станция 1",
+    "address": "ул. Тверская, 7, Москва",
+    "opening_hours": "10-21",
+    "description": "Описание для Станции 1",
+    "connectors": [
+        {
+            "id": 1,
+            "charging_station_id": 1,
+            "rate": 22,
+            "status": 0
+            "charging_type": {
+                "id": 1,
+                "name": "TYPE 2",
+                "current_type": "AC"
+            },
+        },
+        ...
+    ],
+    "image_ids": [
+        1,
+        2
+    ],
+    "charging_marks": [
+        {
+            "id": 1,
+            "user_id": 1,
+            "user_name": "Dmitry",
+            "charging_station_id": 1,
+            "time": "2024-08-30 23:54:58.455343",
+            "status": 1
+            "charging_type": {
+                "id": 1,
+                "name": "TYPE 2",
+                "current_type": "AC"
+            },
+        },
+        ...
+    ]
+}
+

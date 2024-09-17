@@ -1,0 +1,25 @@
+
+Запрос:
+
+POST http://194.67.88.154:8000/charge HTTP/1.1
+Content-Type: application/json
+Сontent-Length: 99
+
+{
+    "connector_id": 1,
+    "amount": 20,
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+
+Ответ:
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Сontent-Length: 21
+
+{
+    "order_id": 1
+}
+
+
+

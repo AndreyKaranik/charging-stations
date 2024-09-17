@@ -1,0 +1,14 @@
+Запрос:
+
+GET http://194.67.88.154:8000/charging-station-images/1 HTTP/1.1
+
+Ответ:
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 306286
+
+{
+    "data":"/9j/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LC..."
+}
+

@@ -1,0 +1,19 @@
+
+Запрос:
+
+GET http://194.67.88.154:8000/orders/1 HTTP/1.1
+
+Ответ:
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 98
+
+{
+    "connector_id": 1,
+    "user_id": 1,
+    "amount": 20,
+    "status": 1,
+    "progress": 50
+}
+

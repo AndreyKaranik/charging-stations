@@ -1,0 +1,23 @@
+
+Запрос:
+
+POST http://194.67.88.154:8000/auth HTTP/1.1
+Content-Type: application/json
+Сontent-Length: 64
+
+{
+    "email": "email@example.com",
+    "password": "password"
+}
+
+Ответ:
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 58
+
+{
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+
+
