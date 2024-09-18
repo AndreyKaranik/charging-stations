@@ -14,7 +14,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>org.example.App</mainClass>
+              <mainClass>org.example.Server</mainClass>
             </manifest>
           </archive>
         </configuration>
@@ -38,7 +38,7 @@
             <configuration>
               <transformers>
                 <transformer>
-                  <mainClass>org.example.App</mainClass>
+                  <mainClass>org.example.Server</mainClass>
                 </transformer>
               </transformers>
             </configuration>

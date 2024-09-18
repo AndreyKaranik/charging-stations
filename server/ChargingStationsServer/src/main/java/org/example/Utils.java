@@ -2,324 +2,188 @@ package org.example;
 
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
+import org.example.entities.Order;
+import org.example.entities.User;
 import org.example.request.ChargeRequest;
 import org.example.request.MarkRequest;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import javax.mail.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.sql.*;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Base64;
+import java.util.*;
 
 public class Utils {
-
-    private static final SecureRandom secureRandom = new SecureRandom();
-    private static final Base64.Encoder base64Encoder = Base64.getUrlEncoder();
-
     public static String generateNewToken() {
+        Base64.Encoder base64Encoder = Base64.getUrlEncoder();
+        SecureRandom secureRandom = new SecureRandom();
         byte[] randomBytes = new byte[24];
         secureRandom.nextBytes(randomBytes);
         return base64Encoder.encodeToString(randomBytes);
     }
 
-    public static JSONArray getChargingMarksWithUserNameByChargingStationId(Connection connection, int chargingStationId) {
+    public static JSONArray getChargingMarksWithUserNameByChargingStationId(Connection connection, int chargingStationId) throws SQLException {
         String sql = "SELECT * FROM charging_marks WHERE charging_station_id = " + chargingStationId;
-        Statement stmt = null;
-        ResultSet rs = null;
-
         JSONArray array = new JSONArray();
-        try {
-            stmt = connection.createStatement();
-            rs = stmt.executeQuery(sql);
-            while (rs.next()) {
-                int id = rs.getInt("id");
-                int markChargingStationId = rs.getInt("charging_station_id");
-                int status = rs.getInt("status");
-                int userId = rs.getInt("user_id");
-                int chargingTypeId = rs.getInt("charging_type_id");
-                Timestamp timestamp = rs.getTimestamp("time");
-                JSONObject object = new JSONObject();
-                object.put("id", id);
-                object.put("charging_station_id", markChargingStationId);
-                object.put("status", status);
-                if (userId != 0) {
-                    object.put("user_id", userId);
-                    object.put("user_name", Utils.getUserNameByUserId(connection, userId));
-                }
-                object.put("charging_type", Utils.getChargingTypeByChargingTypeId(connection, chargingTypeId));
-                object.put("time", timestamp);
-                array.put(object);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        return array;
-    }
-
-
-    public static JSONArray getConnectorsByChargingStationId(Connection connection, int chargingStationId) throws IOException {
-        String sql = "SELECT * FROM connectors WHERE charging_station_id = " + chargingStationId;
-        Statement stmt = null;
-        ResultSet rs = null;
-        JSONArray array = new JSONArray();
-
-        try {
-            stmt = connection.createStatement();
-            rs = stmt.executeQuery(sql);
-            while (rs.next()) {
-                int id = rs.getInt("id");
-                int connectorChargingStationId = rs.getInt("charging_station_id");
-                int status = rs.getInt("status");
-                int chargingTypeId = rs.getInt("charging_type_id");
-                double rate = rs.getDouble("rate");
-                JSONObject o = new JSONObject();
-                o.put("id", id);
-                o.put("charging_station_id", connectorChargingStationId);
-                o.put("status", status);
-                o.put("rate", rate);
-                o.put("charging_type", Utils.getChargingTypeByChargingTypeId(connection, chargingTypeId));
-
-                array.put(o);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        return array;
-    }
-
-    public static JSONObject getChargingTypeByChargingTypeId(Connection connection, int chargingTypeId) {
-        String sql = "SELECT * FROM charging_types WHERE id = " + chargingTypeId;
-        Statement stmt = null;
-        ResultSet rs = null;
-
-        JSONObject object = new JSONObject();
-        try {
-            stmt = connection.createStatement();
-            rs = stmt.executeQuery(sql);
-            rs.next();
-            int charging_type_id = rs.getInt("id");
-            String charging_type_name = rs.getString("name");
-            String currentType = rs.getString("current_type");
-            object.put("id", charging_type_id);
-            object.put("name", charging_type_name);
-            object.put("current_type", currentType);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        return object;
-    }
-
-    public static JSONObject getChargingStationDetailsByChargingStationId(Connection connection, int chargingStationId, HttpExchange httpExchange) throws IOException {
-        String sql = "SELECT * FROM charging_stations WHERE id = " + chargingStationId;
-        Statement stmt = null;
-        ResultSet rs = null;
-
-        JSONObject object = new JSONObject();
-        try {
-            stmt = connection.createStatement();
-            rs = stmt.executeQuery(sql);
-
-            rs.next();
+        Statement stmt  = connection.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
+        while (rs.next()) {
             int id = rs.getInt("id");
-            String name = rs.getString("name");
-            String address = rs.getString("address");
-            double latitude = rs.getDouble("latitude");
-            double longitude = rs.getDouble("longitude");
-            String hours = rs.getString("opening_hours");
-            String description = rs.getString("description");
+            int markChargingStationId = rs.getInt("charging_station_id");
+            int status = rs.getInt("status");
+            int userId = rs.getInt("user_id");
+            int chargingTypeId = rs.getInt("charging_type_id");
+            Timestamp timestamp = rs.getTimestamp("time");
+            JSONObject object = new JSONObject();
             object.put("id", id);
-            object.put("name", name);
-            object.put("address", address);
-            object.put("latitude", latitude);
-            object.put("longitude", longitude);
-            object.put("opening_hours", hours);
-            object.put("description", description);
-            object.put("connectors", Utils.getConnectorsByChargingStationId(connection, id));
-            object.put("charging_marks", Utils.getChargingMarksWithUserNameByChargingStationId(connection, id));
-            object.put("image_ids", Utils.getChargingStationImageIdsByChargingStationId(connection, id));
-        } catch (SQLException e) {
-            httpExchange.sendResponseHeaders(500, 0);
-            OutputStream os = httpExchange.getResponseBody();
-            os.flush();
-            os.close();
-            e.printStackTrace();
-        } finally {
-            try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
+            object.put("charging_station_id", markChargingStationId);
+            object.put("status", status);
+            if (userId != 0) {
+                object.put("user_id", userId);
+                object.put("user_name", Utils.getUserNameByUserId(connection, userId));
             }
+            object.put("charging_type", Utils.getChargingTypeByChargingTypeId(connection, chargingTypeId));
+            object.put("time", timestamp);
+            array.put(object);
         }
+        return array;
+    }
+
+
+    public static JSONArray getConnectorsByChargingStationId(Connection connection, int chargingStationId) throws SQLException {
+        String sql = "SELECT * FROM connectors WHERE charging_station_id = " + chargingStationId;
+        JSONArray array = new JSONArray();
+        Statement stmt = connection.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
+        while (rs.next()) {
+            int id = rs.getInt("id");
+            int connectorChargingStationId = rs.getInt("charging_station_id");
+            int status = rs.getInt("status");
+            int chargingTypeId = rs.getInt("charging_type_id");
+            double rate = rs.getDouble("rate");
+            JSONObject o = new JSONObject();
+            o.put("id", id);
+            o.put("charging_station_id", connectorChargingStationId);
+            o.put("status", status);
+            o.put("rate", rate);
+            o.put("charging_type", Utils.getChargingTypeByChargingTypeId(connection, chargingTypeId));
+            array.put(o);
+        }
+        return array;
+    }
+
+    public static JSONObject getChargingTypeByChargingTypeId(Connection connection, int chargingTypeId) throws SQLException {
+        String sql = "SELECT * FROM charging_types WHERE id = " + chargingTypeId;
+        JSONObject object = new JSONObject();
+        Statement stmt = connection.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
+        rs.next();
+        int charging_type_id = rs.getInt("id");
+        String charging_type_name = rs.getString("name");
+        String currentType = rs.getString("current_type");
+        object.put("id", charging_type_id);
+        object.put("name", charging_type_name);
+        object.put("current_type", currentType);
         return object;
     }
 
-    public static String getUserNameByUserId(Connection connection, int userId) {
-        String sql = "SELECT * FROM users WHERE id = " + userId;
-        Statement stmt = null;
-        ResultSet rs = null;
-        String name = null;
-        try {
-            stmt = connection.createStatement();
-            rs = stmt.executeQuery(sql);
+    public static JSONObject getChargingStationDetailsByChargingStationId(Connection connection, int chargingStationId, HttpExchange httpExchange) throws IOException, SQLException {
+        String sql = "SELECT * FROM charging_stations WHERE id = " + chargingStationId;
+        JSONObject object = new JSONObject();
+        Statement stmt = connection.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
+        rs.next();
+        int id = rs.getInt("id");
+        String name = rs.getString("name");
+        String address = rs.getString("address");
+        double latitude = rs.getDouble("latitude");
+        double longitude = rs.getDouble("longitude");
+        String hours = rs.getString("opening_hours");
+        String description = rs.getString("description");
+        object.put("id", id);
+        object.put("name", name);
+        object.put("address", address);
+        object.put("latitude", latitude);
+        object.put("longitude", longitude);
+        object.put("opening_hours", hours);
+        object.put("description", description);
+        object.put("connectors", Utils.getConnectorsByChargingStationId(connection, id));
+        object.put("charging_marks", Utils.getChargingMarksWithUserNameByChargingStationId(connection, id));
+        object.put("image_ids", Utils.getChargingStationImageIdsByChargingStationId(connection, id));
+        return object;
+    }
 
-            rs.next();
-            name = rs.getString("name");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
+    public static String getUserNameByUserId(Connection connection, int userId) throws SQLException {
+        String sql = "SELECT * FROM users WHERE id = " + userId;
+        Statement stmt = connection.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
+        rs.next();
+        String name = rs.getString("name");
         return name;
     }
 
-    public static JSONArray getChargingStations(Connection connection, String level, String query) {
+    public static JSONArray getChargingStations(Connection connection, String level, String query) throws SQLException {
         Statement stmt = null;
         ResultSet rs = null;
-
         JSONArray array = new JSONArray();
-
         if (level != null) {
             if (level.equals("min")) {
-                try {
-                    String sql = "SELECT id, latitude, longitude FROM charging_stations;";
-                    stmt = connection.createStatement();
-                    rs = stmt.executeQuery(sql);
-                    while (rs.next()) {
-                        int id = rs.getInt("id");
-                        double latitude = rs.getDouble("latitude");
-                        double longitude = rs.getDouble("longitude");
-                        JSONObject object = new JSONObject();
-                        object.put("id", id);
-                        object.put("latitude", latitude);
-                        object.put("longitude", longitude);
-                        array.put(object);
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                } finally {
-                    try {
-                        if (rs != null) rs.close();
-                        if (stmt != null) stmt.close();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
+                String sql = "SELECT id, latitude, longitude FROM charging_stations;";
+                stmt = connection.createStatement();
+                rs = stmt.executeQuery(sql);
+                while (rs.next()) {
+                    int id = rs.getInt("id");
+                    double latitude = rs.getDouble("latitude");
+                    double longitude = rs.getDouble("longitude");
+                    JSONObject object = new JSONObject();
+                    object.put("id", id);
+                    object.put("latitude", latitude);
+                    object.put("longitude", longitude);
+                    array.put(object);
                 }
             }
             if (level.equals("medium")) {
-                try {
-                    String sql = "SELECT id, name, address, latitude, longitude FROM charging_stations";
-                    stmt = connection.createStatement();
-                    rs = stmt.executeQuery(sql);
-
-                    while (rs.next()) {
-                        int id = rs.getInt("id");
-                        String name = rs.getString("name");
-                        String address = rs.getString("address");
-                        double latitude = rs.getDouble("latitude");
-                        double longitude = rs.getDouble("longitude");
-                        JSONObject object = new JSONObject();
-                        object.put("id", id);
-                        object.put("name", name);
-                        object.put("address", address);
-                        object.put("latitude", latitude);
-                        object.put("longitude", longitude);
-                        object.put("charging_types", Utils.getChargingTypesByChargingStationId(connection, id));
-                        if (query != null) {
-                            if (name.toLowerCase().contains(query.toLowerCase()) ||
-                                    address.toLowerCase().contains(query.toLowerCase())) {
-                                array.put(object);
-                            }
-                        } else {
+                String sql = "SELECT id, name, address, latitude, longitude FROM charging_stations";
+                stmt = connection.createStatement();
+                rs = stmt.executeQuery(sql);
+                while (rs.next()) {
+                    int id = rs.getInt("id");
+                    String name = rs.getString("name");
+                    String address = rs.getString("address");
+                    double latitude = rs.getDouble("latitude");
+                    double longitude = rs.getDouble("longitude");
+                    JSONObject object = new JSONObject();
+                    object.put("id", id);
+                    object.put("name", name);
+                    object.put("address", address);
+                    object.put("latitude", latitude);
+                    object.put("longitude", longitude);
+                    object.put("charging_types", Utils.getChargingTypesByChargingStationId(connection, id));
+                    if (query != null) {
+                        if (name.toLowerCase().contains(query.toLowerCase()) ||
+                                address.toLowerCase().contains(query.toLowerCase())) {
                             array.put(object);
                         }
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                } finally {
-                    try {
-                        if (rs != null) rs.close();
-                        if (stmt != null) stmt.close();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
+                    } else {
+                        array.put(object);
                     }
                 }
             }
             if (level.equals("full")) {
-                try {
-                    String sql = "SELECT * FROM charging_stations";
-                    stmt = connection.createStatement();
-                    rs = stmt.executeQuery(sql);
-
-                    while (rs.next()) {
-                        int id = rs.getInt("id");
-                        String name = rs.getString("name");
-                        String address = rs.getString("address");
-                        double latitude = rs.getDouble("latitude");
-                        double longitude = rs.getDouble("longitude");
-                        String hours = rs.getString("opening_hours");
-                        String description = rs.getString("description");
-                        JSONObject object = new JSONObject();
-                        object.put("id", id);
-                        object.put("name", name);
-                        object.put("address", address);
-                        object.put("latitude", latitude);
-                        object.put("longitude", longitude);
-                        object.put("opening_hours", hours);
-                        object.put("description", description);
-                        array.put(object);
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                } finally {
-                    try {
-                        if (rs != null) rs.close();
-                        if (stmt != null) stmt.close();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        } else {
-            try {
                 String sql = "SELECT * FROM charging_stations";
                 stmt = connection.createStatement();
                 rs = stmt.executeQuery(sql);
-
                 while (rs.next()) {
                     int id = rs.getInt("id");
                     String name = rs.getString("name");
@@ -338,113 +202,81 @@ public class Utils {
                     object.put("description", description);
                     array.put(object);
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            } finally {
-                try {
-                    if (rs != null) rs.close();
-                    if (stmt != null) stmt.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
             }
-        }
-
-        return array;
-    }
-
-
-    public static JSONArray getChargingTypesByChargingStationId(Connection connection, int chargingStationId) {
-        String sql = "SELECT DISTINCT ct.id, ct.name, ct.current_type\n" +
-                "FROM charging_stations cs\n" +
-                "JOIN connectors c ON cs.id = c.charging_station_id\n" +
-                "JOIN charging_types ct ON c.charging_type_id = ct.id\n" +
-                "WHERE cs.id = " + chargingStationId;
-        Statement stmt = null;
-        ResultSet rs = null;
-        JSONArray array = new JSONArray();
-
-        try {
+        } else {
+            String sql = "SELECT * FROM charging_stations";
             stmt = connection.createStatement();
             rs = stmt.executeQuery(sql);
             while (rs.next()) {
                 int id = rs.getInt("id");
                 String name = rs.getString("name");
-                String currentType = rs.getString("current_type");
-                JSONObject o = new JSONObject();
-                o.put("id", id);
-                o.put("name", name);
-                o.put("current_type", currentType);
-                array.put(o);
+                String address = rs.getString("address");
+                double latitude = rs.getDouble("latitude");
+                double longitude = rs.getDouble("longitude");
+                String hours = rs.getString("opening_hours");
+                String description = rs.getString("description");
+                JSONObject object = new JSONObject();
+                object.put("id", id);
+                object.put("name", name);
+                object.put("address", address);
+                object.put("latitude", latitude);
+                object.put("longitude", longitude);
+                object.put("opening_hours", hours);
+                object.put("description", description);
+                array.put(object);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+        }
+
+        return array;
+    }
+
+
+    public static JSONArray getChargingTypesByChargingStationId(Connection connection, int chargingStationId) throws SQLException {
+        String sql = "SELECT DISTINCT ct.id, ct.name, ct.current_type\n" +
+                "FROM charging_stations cs\n" +
+                "JOIN connectors c ON cs.id = c.charging_station_id\n" +
+                "JOIN charging_types ct ON c.charging_type_id = ct.id\n" +
+                "WHERE cs.id = " + chargingStationId;
+        JSONArray array = new JSONArray();
+        Statement stmt  = connection.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
+        while (rs.next()) {
+            int id = rs.getInt("id");
+            String name = rs.getString("name");
+            String currentType = rs.getString("current_type");
+            JSONObject o = new JSONObject();
+            o.put("id", id);
+            o.put("name", name);
+            o.put("current_type", currentType);
+            array.put(o);
         }
         return array;
     }
 
-    public static JSONObject getChargingStationImageById(Connection connection, int chargingStationImageId) {
+    public static JSONObject getChargingStationImageById(Connection connection, int chargingStationImageId) throws SQLException, IOException {
         String sql = "SELECT * FROM charging_station_images WHERE id = " + chargingStationImageId;
-        Statement stmt = null;
-        ResultSet rs = null;
         JSONObject object = new JSONObject();
-
-        try {
-            stmt = connection.createStatement();
-            rs = stmt.executeQuery(sql);
-            rs.next();
-            int id = rs.getInt("id");
-            String path = rs.getString("path");
-            File imageFile = new File("/root/chargingstations/images/" + path);
-            byte[] imageBytes = Files.readAllBytes(imageFile.toPath());
-            String base64Image = Base64.getEncoder().encodeToString(imageBytes);
-
-            object.put("id", id);
-            object.put("data", base64Image);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
+        Statement stmt = connection.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
+        rs.next();
+        int id = rs.getInt("id");
+        String path = rs.getString("path");
+        File imageFile = new File("/root/chargingstations/images/" + path);
+        byte[] imageBytes = Files.readAllBytes(imageFile.toPath());
+        String base64Image = Base64.getEncoder().encodeToString(imageBytes);
+        object.put("id", id);
+        object.put("data", base64Image);
         return object;
     }
 
-    public static JSONArray getChargingStationImageIdsByChargingStationId(Connection connection, int chargingStationId) {
+    public static JSONArray getChargingStationImageIdsByChargingStationId(Connection connection, int chargingStationId) throws SQLException {
         String sql = "SELECT id FROM charging_station_images WHERE charging_station_id = " + chargingStationId;
-        Statement stmt = null;
-        ResultSet rs = null;
         JSONArray array = new JSONArray();
-
-        try {
-            stmt = connection.createStatement();
-            rs = stmt.executeQuery(sql);
-            while (rs.next()) {
-                int id = rs.getInt("id");
-                array.put(id);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+        Statement stmt = connection.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
+        while (rs.next()) {
+            int id = rs.getInt("id");
+            array.put(id);
         }
         return array;
     }
@@ -633,9 +465,6 @@ public class Utils {
     }
 
 
-
-
-
     public static void sendHttpJsonResponse(HttpExchange httpExchange, Object obj) throws IOException {
         Gson gson = new Gson();
         String response = gson.toJson(obj);
@@ -649,9 +478,20 @@ public class Utils {
         os.close();
     }
 
-    public static void sendHttpResponse(HttpExchange httpExchange, String response) throws IOException {
+    public static void sendHttpJsonResponse(HttpExchange httpExchange, String response) throws IOException {
         ArrayList<String> list = new ArrayList<>();
         list.add("application/json");
+        httpExchange.getResponseHeaders().put("Content-Type", list);
+        httpExchange.sendResponseHeaders(200, response.getBytes(StandardCharsets.UTF_8).length);
+        OutputStream os = httpExchange.getResponseBody();
+        os.write(response.getBytes());
+        os.flush();
+        os.close();
+    }
+
+    public static void sendHttpHtmlResponse(HttpExchange httpExchange, String response) throws IOException {
+        ArrayList<String> list = new ArrayList<>();
+        list.add("text/html");
         httpExchange.getResponseHeaders().put("Content-Type", list);
         httpExchange.sendResponseHeaders(200, response.getBytes(StandardCharsets.UTF_8).length);
         OutputStream os = httpExchange.getResponseBody();
@@ -672,5 +512,70 @@ public class Utils {
         OutputStream os = httpExchange.getResponseBody();
         os.flush();
         os.close();
+    }
+
+    public static void sendHttp404Response(HttpExchange httpExchange) throws IOException {
+        httpExchange.sendResponseHeaders(404, 0);
+        OutputStream os = httpExchange.getResponseBody();
+        os.flush();
+        os.close();
+    }
+
+    public static String readBodyAsString(HttpExchange httpExchange) throws IOException {
+        return new String(httpExchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+    }
+
+    public static Map<String, String> getQueryParams(HttpExchange httpExchange) {
+        String query = httpExchange.getRequestURI().getQuery();
+        Map<String, String> queryParams = new HashMap<>();
+        if (query != null && !query.isEmpty()) {
+            String[] pairs = query.split("&");
+            for (String pair : pairs) {
+                String[] keyValue = pair.split("=");
+                if (keyValue.length > 1) {
+                    queryParams.put(keyValue[0], keyValue[1]);
+                } else {
+                    queryParams.put(keyValue[0], "");
+                }
+            }
+        }
+        return queryParams;
+    }
+
+    public static boolean sendEmail(String to, String token) throws IOException {
+        String path = "/root/chargingstations/email.txt";
+        String content = new String(Files.readAllBytes(Path.of(path)));
+        String[] lines = content.split("\n");
+        String username = lines[0].strip();
+        String password = lines[1].strip();
+
+        Properties props = new Properties();
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.host", "smtp.yandex.ru");
+        props.put("mail.smtp.port", "465");
+        props.put("mail.smtp.ssl.enable", "true");
+        Session session = Session.getInstance(props,
+                new javax.mail.Authenticator() {
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(username, password);
+                    }
+                });
+        try {
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(username));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
+            message.setSubject("Registration Confirmation");
+            message.setText("Please confirm your registration by clicking the following link: " +
+                    "http://194.67.88.154:8000/confirm?token=" + token);
+
+            Transport.send(message);
+            System.out.println("Email sent successfully.");
+
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
     }
 }
