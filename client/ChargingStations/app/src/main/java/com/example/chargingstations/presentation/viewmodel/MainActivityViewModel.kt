@@ -7,7 +7,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.chargingstations.data.ApiService
+import com.example.chargingstations.data.api.Api
 import com.example.chargingstations.domain.model.ChargingStationDetails
 import com.example.chargingstations.domain.model.ChargingStationMedium
 import com.example.chargingstations.domain.model.ChargingStationMin
@@ -112,7 +112,7 @@ class MainActivityViewModel : ViewModel() {
         .client(httpClient)
         .build()
 
-    private val apiService = retrofit.create(ApiService::class.java)
+    private val apiService = retrofit.create(Api::class.java)
 
     init {
         fetchChargingStations()

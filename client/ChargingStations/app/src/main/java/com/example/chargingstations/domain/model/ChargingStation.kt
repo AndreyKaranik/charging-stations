@@ -17,16 +17,3 @@ data class ChargingStationMedium (
     @SerializedName("charging_types")
     val chargingTypes: List<ChargingType>
 )
-
-data class ChargingStationJson (
-    val id: Int?,
-    val name: String?,
-    val address: String?,
-    val latitude: Double?,
-    val longitude: Double?,
-    @SerializedName("opening_hours")
-    val openingHours: String?,
-    val description: String?,
-    @SerializedName("charging_types")
-    val chargingTypes: List<ChargingType>?
-)

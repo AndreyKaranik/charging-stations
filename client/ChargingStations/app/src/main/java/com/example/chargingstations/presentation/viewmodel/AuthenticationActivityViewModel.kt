@@ -3,9 +3,9 @@ package com.example.chargingstations.presentation.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.chargingstations.data.ApiService
-import com.example.chargingstations.domain.model.request.AuthRequest
-import com.example.chargingstations.domain.model.request.RegisterRequest
+import com.example.chargingstations.data.api.Api
+import com.example.chargingstations.data.api.request.AuthRequest
+import com.example.chargingstations.data.api.request.RegisterRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -35,7 +35,7 @@ class AuthenticationActivityViewModel : ViewModel() {
         .client(httpClient)
         .build()
 
-    private val apiService = retrofit.create(ApiService::class.java)
+    private val apiService = retrofit.create(Api::class.java)
 
 
     private val _usernameDialogIsShown = MutableStateFlow(false)

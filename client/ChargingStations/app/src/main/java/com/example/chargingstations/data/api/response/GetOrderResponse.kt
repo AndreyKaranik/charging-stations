@@ -1,4 +1,4 @@
-package com.example.chargingstations.domain.model.response
+package com.example.chargingstations.data.api.response
 
 import com.google.gson.annotations.SerializedName
 
