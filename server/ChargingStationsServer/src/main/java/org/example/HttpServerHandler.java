@@ -38,14 +38,19 @@ public class HttpServerHandler implements HttpHandler, API {
 
     public static final String PASSWORD = "postgres";
 
-    private final List<Route> routes = new ArrayList<>();
+    private final List<Endpoint> endpoints = new ArrayList<>();
 
     public HttpServerHandler() {
-        routes.add(new Route("GET", "/charging-station-images/(\\d+)$", this::getChargingStationImage));
-        routes.add(new Route("GET", "/privacy-policy$", this::getPrivacyPolicy));
-        routes.add(new Route("GET", "/charging-stations$", this::getChargingStations));
-        routes.add(new Route("GET", "/charging-stations/(\\d+)$", this::getChargingStationDetails));
-
+        endpoints.add(new Endpoint("GET", "/charging-station-images/(\\d+)$", this::getChargingStationImage));
+        endpoints.add(new Endpoint("GET", "/charging-stations/(\\d+)$", this::getChargingStationDetails));
+        endpoints.add(new Endpoint("GET", "/orders/(\\d+)$", this::getOrder));
+        endpoints.add(new Endpoint("POST", "/auth$", this::auth));
+        endpoints.add(new Endpoint("POST", "/register$", this::register));
+        endpoints.add(new Endpoint("POST", "/mark$", this::mark));
+        endpoints.add(new Endpoint("POST", "/charge", this::charge));
+        endpoints.add(new Endpoint("POST", "/confirm", this::confirm));
+        endpoints.add(new Endpoint("GET", "/privacy-policy$", this::getPrivacyPolicy));
+        endpoints.add(new Endpoint("GET", "/charging-stations", this::getChargingStations));
     }
 
     @Override
@@ -359,12 +364,12 @@ public class HttpServerHandler implements HttpHandler, API {
         }
     }
 
-    private static class Route {
+    private static class Endpoint {
         private final String method;
         private final Pattern pattern;
         private final BiConsumer<HttpExchange, Matcher> handler;
 
-        public Route(String method, String regex, BiConsumer<HttpExchange, Matcher> handler) {
+        public Endpoint(String method, String regex, BiConsumer<HttpExchange, Matcher> handler) {
             this.method = method;
             this.pattern = Pattern.compile(regex);
             this.handler = handler;
@@ -390,7 +395,7 @@ public class HttpServerHandler implements HttpHandler, API {
 
         String path = httpExchange.getRequestURI().getPath();
 
-        for (Route route : routes) {
+        for (Endpoint route : endpoints) {
             Matcher matcher = route.pattern.matcher(path);
             if (matcher.find() && httpExchange.getRequestMethod().equals(route.method)) {
                 route.handler.accept(httpExchange, matcher);
